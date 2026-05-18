@@ -12,6 +12,7 @@ catalog:
   hosted-git-info: ^10.1.0
   '@types/hosted-git-info': ^3.0.5
 overrides:
+  minimatch: ^3.1.4
   vite: 'catalog:'
   vitest: 'catalog:'
 peerDependencyRules:

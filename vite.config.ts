@@ -66,7 +66,7 @@ export default defineConfig({
     minify: true,
   },
   staged: {
-    '*': 'vp check',
+    '*': 'vp check --no-error-on-unmatched-pattern',
   },
   test: {},
   lint: {
