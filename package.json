@@ -6,21 +6,27 @@
     "url": "https://github.com/jkker/userscripts/issues"
   },
   "license": "MIT",
-  "author": {
-    "name": "jkker"
-  },
+  "author": "jkker",
   "repository": {
     "type": "git",
     "url": "https://github.com/jkker/userscripts.git"
   },
   "type": "module",
+  "imports": {
+    "#/*": "./src/*"
+  },
   "scripts": {
-    "build": "vp run -r build",
-    "prepare": "vp config"
+    "build": "node scripts/build.js",
+    "prepare": "vp config",
+    "ready": "vp run build && vp run validate",
+    "validate": "node scripts/validate-userscripts.js"
   },
   "devDependencies": {
     "@types/node": "catalog:",
-    "@types/tampermonkey": "catalog:",
+    "hosted-git-info": "catalog:",
+    "simple-icons": "catalog:",
+    "vite": "catalog:",
+    "vite-plugin-monkey": "catalog:",
     "vite-plus": "catalog:"
   },
   "engines": {

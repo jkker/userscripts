@@ -1,11 +1,20 @@
 {
   "compilerOptions": {
     "target": "es2023",
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
+    "module": "esnext",
+    "lib": ["ES2023", "DOM"],
     "skipLibCheck": true,
-    "noEmit": true,
     "allowImportingTsExtensions": true,
-    "esModuleInterop": true
-  }
+
+    "noEmit": true,
+
+    /* Linting */
+    "allowJs": true,
+    "checkJs": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "types": ["vite-plugin-monkey/global"]
+  },
+  "include": ["src/**/*.ts", "scripts/**/*.js", "vite.config.ts"]
 }

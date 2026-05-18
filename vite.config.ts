@@ -1,124 +1,94 @@
+import hostedGitInfo from 'hosted-git-info'
+import monkey from 'vite-plugin-monkey'
 import { defineConfig } from 'vite-plus'
 
+import { config as metasearch } from '#/metasearch/config.ts'
+import { scripts } from '#/scripts.ts'
+
+import root from './package.json' with { type: 'json' }
+
+const gitURL = hostedGitInfo.fromUrl(root.repository.url)
+
+if (!gitURL) throw new Error('Invalid repository URL in package.json')
+
+function metasearchMatches(): string[] {
+  const matches = metasearch.engines
+    .filter(({ disabled }) => !disabled)
+    .flatMap(({ url }) => {
+      const { hostname, pathname } = new URL(url)
+      const domain = hostname.split('.').slice(-2).join('.')
+      return [`*://${domain}${pathname}*`, `*://*.${domain}${pathname}*`]
+    })
+
+  return [...new Set(matches)]
+}
+
+const modeIndex = process.argv.indexOf('--mode')
+const mode = modeIndex === -1 ? undefined : process.argv[modeIndex + 1]
+const script = scripts.find(({ slug }) => slug === mode) ?? scripts[0]
+
+if (!script) throw new Error('No userscripts configured')
+
+const fileName = `${script.slug}.user.js`
+const icon = script.icon?.startsWith('http')
+  ? script.icon
+  : script.icon
+    ? gitURL.file(script.icon)
+    : undefined
+const match = script.slug === 'metasearch' ? metasearchMatches() : [...script.match]
+const grant = script.grant[0] === 'none' ? 'none' : script.grant.filter((value) => value !== 'none')
+
 export default defineConfig({
+  plugins: [
+    monkey({
+      entry: script.entry,
+      build: { fileName, metaFileName: false },
+      userscript: {
+        name: script.name,
+        namespace: root.repository.url,
+        version: script.version,
+        description: script.description,
+        author: root.author,
+        match,
+        icon,
+        grant,
+        'run-at': script.runAt,
+        noframes: true,
+        updateURL: gitURL.file(`dist/${fileName}`),
+        downloadURL: gitURL.file(`dist/${fileName}`),
+        supportURL: gitURL.bugs(),
+      },
+    }),
+  ],
+  build: {
+    outDir: 'dist',
+    emptyOutDir: false,
+    minify: true,
+  },
   staged: {
     '*': 'vp check',
   },
   test: {},
   lint: {
-    ignorePatterns: ['**/dist/**'],
+    ignorePatterns: ['dist/**'],
     options: {
       typeAware: true,
       typeCheck: true,
       reportUnusedDisableDirectives: 'warn',
     },
-    plugins: ['unicorn', 'eslint', 'typescript', 'oxc', 'import', 'promise'],
     env: {
       builtin: true,
-      es2026: true,
       browser: true,
+      es2026: true,
     },
-    categories: {
-      correctness: 'deny',
-      suspicious: 'warn',
-    },
-    rules: {
-      curly: ['warn', 'multi'],
-      'arrow-body-style': ['warn', 'as-needed'],
-      'no-shadow': 0,
-      'no-useless-rename': 'warn',
-      'no-var': 'deny',
-      'no-unused-vars': [
-        'warn',
-        {
-          args: 'after-used',
-          argsIgnorePattern: '^_',
-          caughtErrorsIgnorePattern: '^_',
-          destructuredArrayIgnorePattern: '^_',
-          varsIgnorePattern: '^_',
-          ignoreRestSiblings: true,
-        },
-      ],
-
-      'oxc/branches-sharing-code': 'error',
-      'oxc/no-barrel-file': 'error',
-
-      'import/export': 'deny',
-      'import/no-duplicates': 'warn',
-      'import/no-empty-named-blocks': 'warn',
-      'import/no-cycle': 'deny',
-      'import/no-named-default': 'warn',
-      'import/namespace': 0,
-      'import/named': 0,
-      'import/default': 0,
-      'import/no-named-as-default-member': 0,
-      'import/no-named-as-default': 0,
-      'import/no-unassigned-import': [
-        'warn',
-        {
-          allow: [
-            '**/*.css',
-            'react',
-            'temporal-polyfill/global',
-            'vite-plus/test/browser/context',
-          ],
-        },
-      ],
-      'typescript/no-deprecated': 'warn',
-      'typescript/no-explicit-any': 'warn',
-      'typescript/no-unnecessary-type-constraint': 'warn',
-      'typescript/no-redundant-type-constituents': 'warn',
-      'typescript/no-useless-empty-export': 'warn',
-      'typescript/no-unsafe-type-assertion': 0,
-      'typescript/no-extra-non-null-assertion': 'deny',
-      'typescript/no-non-null-asserted-optional-chain': 'deny',
-      'typescript/prefer-as-const': 'warn',
-      'typescript/no-duplicate-enum-values': 'deny',
-      'typescript/triple-slash-reference': 'deny',
-      'typescript/no-misused-new': 'deny',
-      'typescript/no-this-alias': 'warn',
-      'typescript/no-unsafe-declaration-merging': 'deny',
-      'typescript/await-thenable': 'deny',
-      'typescript/no-floating-promises': 'deny',
-      'typescript/no-for-in-array': 'deny',
-      'typescript/no-implied-eval': 'deny',
-      'typescript/no-base-to-string': 'warn',
-      'typescript/restrict-template-expressions': 'warn',
-      'typescript/unbound-method': 'warn',
-
-      'unicorn/no-array-for-each': 'warn',
-      'unicorn/prefer-array-find': 'warn',
-
-      'promise/param-names': 'deny',
-      'promise/no-new-statics': 'deny',
-      'promise/valid-params': 'deny',
-    },
-    overrides: [
-      {
-        files: ['**/*.{test,spec}.*', 'rt.d.ts'],
-        plugins: ['vitest'],
-        rules: {
-          'typescript/no-explicit-any': 0,
-          'typescript/no-unsafe-argument': 0,
-          'typescript/no-unsafe-assignment': 0,
-          'typescript/no-unsafe-call': 0,
-          'typescript/no-unsafe-member-access': 0,
-          'typescript/no-unsafe-return': 0,
-        },
-      },
-    ],
   },
   fmt: {
-    ignorePatterns: ['**/dist/**'],
+    ignorePatterns: ['dist/**'],
     semi: false,
     singleQuote: true,
     sortPackageJson: true,
-    sortTailwindcss: {
-      functions: ['clsx', 'cn', 'cx', 'cva'],
-    },
     sortImports: {
-      partitionByComment: true,
-      internalPattern: ['@/', '@.storybook/', '#/'],
+      internalPattern: ['#/*'],
     },
   },
   run: {
