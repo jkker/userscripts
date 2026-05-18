@@ -13,8 +13,8 @@ catalogs:
       specifier: ^10.1.0
       version: 10.1.0
     simple-icons:
-      specifier: ^16.19.0
-      version: 16.19.0
+      specifier: ^16.20.0
+      version: 16.20.0
     vite-plugin-monkey:
       specifier: ^8.0.5
       version: 8.0.5
@@ -38,7 +38,7 @@ importers:
         version: 10.1.0
       simple-icons:
         specifier: 'catalog:'
-        version: 16.19.0
+        version: 16.20.0
       vite:
         specifier: npm:@voidzero-dev/vite-plus-core@latest
         version: '@voidzero-dev/vite-plus-core@0.1.21(@types/node@24.12.4)'
@@ -937,8 +937,8 @@ packages:
     resolution: {integrity: sha512-7++dFhtcx3353uBaq8DDR4NuxBetBzC7ZQOhmTQInHEd6bSrXdiEyzCvG07Z44UYdLShWUyXt5M/yhz8ekcb1A==}
     engines: {node: '>=8'}
 
-  simple-icons@16.19.0:
-    resolution: {integrity: sha512-muxcz/FDvWFPrKJdsjaz79qsBjtZeVKUVIFl7wLVOwb+yqAag8FPe8+hFlMVRnmAXYQIm4eUDDm2+dhOj0cFgQ==}
+  simple-icons@16.20.0:
+    resolution: {integrity: sha512-2b7Xu+Zy+iwLiuLSAcWuxnM1ETNFy7JmxWSjh0Y/A8P3KGjFFcokbpWbUf/IivMNbR9WuZ/QQlirh5bGh3Q2vA==}
     engines: {node: '>=0.12.18'}
 
   sirv@3.0.2:
@@ -1621,7 +1621,7 @@ snapshots:
 
   shebang-regex@3.0.0: {}
 
-  simple-icons@16.19.0: {}
+  simple-icons@16.20.0: {}
 
   sirv@3.0.2:
     dependencies:
