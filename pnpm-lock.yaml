@@ -6,6 +6,9 @@ settings:
 
 catalogs:
   default:
+    '@types/hosted-git-info':
+      specifier: ^3.0.5
+      version: 3.0.5
     '@types/node':
       specifier: ^25.8.0
       version: 25.8.0
@@ -30,6 +33,9 @@ importers:
 
   .:
     devDependencies:
+      '@types/hosted-git-info':
+        specifier: 'catalog:'
+        version: 3.0.5
       '@types/node':
         specifier: 'catalog:'
         version: 25.8.0
@@ -487,6 +493,9 @@ packages:
 
   '@types/estree@1.0.8':
     resolution: {integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==}
+
+  '@types/hosted-git-info@3.0.5':
+    resolution: {integrity: sha512-Dmngh7U003cOHPhKGyA7LWqrnvcTyILNgNPmNCxlx7j8MIi54iBliiT8XqVLIQ3GchoOjVAyBzNJVyuaJjqokg==}
 
   '@types/node@25.8.0':
     resolution: {integrity: sha512-TCFSk8IZh+iLX1xtksoBVtdmgL+1IX0fC9BeU4QqFSuNdN/K+HUlhqOzEmSYYpZUVsLYcPqc9KX+60iDuninSQ==}
@@ -1241,6 +1250,8 @@ snapshots:
   '@types/deep-eql@4.0.2': {}
 
   '@types/estree@1.0.8': {}
+
+  '@types/hosted-git-info@3.0.5': {}
 
   '@types/node@25.8.0':
     dependencies:

@@ -10,6 +10,7 @@ catalog:
   vite-plugin-monkey: ^8.0.5
   simple-icons: ^16.20.0
   hosted-git-info: ^10.1.0
+  '@types/hosted-git-info': ^3.0.5
 overrides:
   vite: 'catalog:'
   vitest: 'catalog:'

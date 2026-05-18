@@ -22,6 +22,7 @@
     "validate": "node scripts/validate-userscripts.js"
   },
   "devDependencies": {
+    "@types/hosted-git-info": "catalog:",
     "@types/node": "catalog:",
     "hosted-git-info": "catalog:",
     "simple-icons": "catalog:",
