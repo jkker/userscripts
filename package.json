@@ -16,10 +16,7 @@
     "#/*": "./src/*"
   },
   "scripts": {
-    "build": "node scripts/build.js",
-    "prepare": "vp config",
-    "ready": "vp run build && vp run validate",
-    "validate": "node scripts/validate-userscripts.js"
+    "prepare": "vp config"
   },
   "devDependencies": {
     "@types/hosted-git-info": "catalog:",
