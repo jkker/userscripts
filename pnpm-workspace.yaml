@@ -1,0 +1,25 @@
+packages:
+  - packages/*
+
+catalogMode: prefer
+
+catalog:
+  '@types/node': ^24.12.4
+  '@types/tampermonkey': ^5.0.5
+  vite: npm:@voidzero-dev/vite-plus-core@latest
+  vitest: npm:@voidzero-dev/vite-plus-test@latest
+  vite-plus: latest
+  vite-plugin-monkey: ^8.0.5
+  simple-icons: ^16.19.0
+overrides:
+  vite: 'catalog:'
+  vitest: 'catalog:'
+peerDependencyRules:
+  allowAny:
+    - vite
+    - vitest
+  allowedVersions:
+    vite: '*'
+    vitest: '*'
+
+cleanupUnusedCatalogs: true
