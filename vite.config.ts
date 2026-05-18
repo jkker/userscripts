@@ -25,14 +25,14 @@ const userscripts = [
   {
     slug: 'github-code-compact',
     name: 'GitHub Code Compact',
-    version: '1.0.0',
+    version: '1.1.0',
     description:
       'Toggle a compact GitHub code view that hides line numbers and keeps selection aligned with JetBrains Mono.',
     entry: 'src/github-code-compact.ts',
     match: ['https://github.com/*'],
     icon: 'https://github.githubassets.com/favicons/favicon.png',
     runAt: 'document-start',
-    grant: ['GM_addElement', 'GM_addStyle'],
+    grant: ['GM_addStyle'],
   },
   {
     slug: 'metasearch',
@@ -143,7 +143,7 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     emptyOutDir: false,
-    minify: true,
+    minify: false,
   },
   staged: {
     '*': 'vp check --no-error-on-unmatched-pattern',

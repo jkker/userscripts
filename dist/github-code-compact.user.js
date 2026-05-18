@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GitHub Code Compact
 // @namespace    https://github.com/jkker/userscripts.git
-// @version      1.0.0
+// @version      1.1.0
 // @author       jkker
 // @description  Toggle a compact GitHub code view that hides line numbers and keeps selection aligned with JetBrains Mono.
 // @license      MIT
@@ -11,90 +11,156 @@
 // @downloadURL  https://raw.githubusercontent.com/jkker/userscripts/HEAD/dist/github-code-compact.user.js
 // @updateURL    https://raw.githubusercontent.com/jkker/userscripts/HEAD/dist/github-code-compact.user.js
 // @match        https://github.com/*
-// @grant        GM_addElement
 // @grant        GM_addStyle
 // @run-at       document-start
 // @noframes
 // ==/UserScript==
 
-(function(){'use strict';var e=`jkker.github-code-compact.enabled`,t=`jkker-github-code-compact`,n=`jkker-code-toggle`,r=`JetBrains Mono`,i=`https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap`,a=localStorage.getItem(e)===`true`,o,s=document.createElement(`button`);function c(){document.querySelector(`link[data-jkker-github-code-font]`)||(GM_addElement(document.documentElement,`link`,{rel:`preconnect`,href:`https://fonts.gstatic.com`,crossorigin:`anonymous`,"data-jkker-github-code-font":`preconnect`}),GM_addElement(document.documentElement,`link`,{rel:`stylesheet`,href:i,"data-jkker-github-code-font":`stylesheet`}))}function l(){GM_addStyle(`
-    body.${t} {
-      --jkker-code-font: "${r}", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-    }
+(function() {
+  'use strict';
+	var STORAGE_KEY = "jkker.github-code-compact.enabled";
+	var ENABLED_CLASS = "jkker-github-code-compact";
+	var BUTTON_CLASS = "jkker-github-code-compact-toggle";
+	var enabled = localStorage.getItem(STORAGE_KEY) === "true";
+	var button;
+	var mountQueued = false;
+	var toolbarObserver;
+	var toolbarObserverTimeout;
+	GM_addStyle(`
+  @import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap");
 
-    body.${t} .react-line-numbers,
-    body.${t} [class^="react-line-numbers"] {
-      display: none !important;
-      width: 0 !important;
-      min-width: 0 !important;
-      flex-basis: 0 !important;
-    }
+  body.${ENABLED_CLASS} {
+    --jkker-github-code-font: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  }
 
-    body.${t} .react-code-text,
-    body.${t} .react-code-line-contents,
-    body.${t} .react-code-file-contents,
-    body.${t} .react-code-lines,
-    body.${t} .blob-code,
-    body.${t} .blob-code-inner,
-    body.${t} pre,
-    body.${t} code,
-    body.${t} #read-only-cursor-text-area,
-    body.${t} textarea.react-blob-textarea,
-    body.${t} .react-blob-print-hide {
-      font-family: var(--jkker-code-font) !important;
-      font-size: 12px !important;
-      font-weight: 400 !important;
-      line-height: 20px !important;
-      font-variant-ligatures: none !important;
-      font-feature-settings: normal !important;
-      letter-spacing: 0 !important;
-      tab-size: 4 !important;
-    }
+  body.${ENABLED_CLASS} .react-line-numbers {
+    display: none !important;
+  }
 
-    body.${t} .react-code-line-contents {
-      padding-left: 0 !important;
-      padding-right: 0 !important;
-      margin-left: 0 !important;
-      margin-right: 0 !important;
-      text-indent: 0 !important;
-    }
+  body.${ENABLED_CLASS} .react-code-text,
+  body.${ENABLED_CLASS} .react-code-line-contents,
+  body.${ENABLED_CLASS} .react-code-file-contents,
+  body.${ENABLED_CLASS} .react-code-lines,
+  body.${ENABLED_CLASS} #read-only-cursor-text-area,
+  body.${ENABLED_CLASS} textarea.react-blob-textarea,
+  body.${ENABLED_CLASS} .react-blob-print-hide {
+    font-family: var(--jkker-github-code-font) !important;
+    font-size: 12px !important;
+    line-height: 20px !important;
+    font-variant-ligatures: none !important;
+    font-feature-settings: normal !important;
+    letter-spacing: 0 !important;
+    tab-size: 4 !important;
+  }
 
-    body.${t} #read-only-cursor-text-area,
-    body.${t} textarea.react-blob-textarea,
-    body.${t} .react-blob-print-hide {
-      padding-left: 0 !important;
-      padding-right: 0 !important;
-      margin-left: 0 !important;
-      margin-right: 0 !important;
-      margin-top: 0 !important;
-      left: 0 !important;
-      text-indent: 0 !important;
-      box-sizing: border-box !important;
-      white-space: pre !important;
-      overflow-wrap: normal !important;
-    }
+  body.${ENABLED_CLASS} .react-code-line-contents,
+  body.${ENABLED_CLASS} #read-only-cursor-text-area,
+  body.${ENABLED_CLASS} textarea.react-blob-textarea,
+  body.${ENABLED_CLASS} .react-blob-print-hide {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    text-indent: 0 !important;
+    box-sizing: border-box !important;
+  }
 
-    .${n} {
-      width: 28px;
-      height: 28px;
-      border: 1px solid var(--borderColor-default, #d0d7de);
-      background: var(--bgColor-default, #ffffff);
-      border-radius: 6px;
-      cursor: pointer;
-      margin-right: 4px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 15px;
-      line-height: 1;
-    }
+  body.${ENABLED_CLASS} #read-only-cursor-text-area,
+  body.${ENABLED_CLASS} textarea.react-blob-textarea,
+  body.${ENABLED_CLASS} .react-blob-print-hide {
+    margin-top: 0 !important;
+    left: 0 !important;
+    white-space: pre !important;
+    overflow-wrap: normal !important;
+  }
 
-    .${n}:hover {
-      background-color: var(--button-default-bgColor-hover, #f6f8fa);
-    }
+  .${BUTTON_CLASS} {
+    width: 28px;
+    height: 28px;
+    margin-right: 4px;
+    border: 1px solid var(--borderColor-default, #d0d7de);
+    border-radius: 6px;
+    background: var(--bgColor-default, #ffffff);
+    color: var(--fgColor-default, #24292f);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    line-height: 1;
+  }
 
-    .${n}[aria-pressed="true"] {
-      border-color: var(--fgColor-accent, #0969da);
-      color: var(--fgColor-accent, #0969da);
-    }
-  `)}function u(){document.body&&(document.body.classList.toggle(t,a),s.setAttribute(`aria-pressed`,String(a)),s.textContent=a?`📖`:`👓`)}function d(){a=!a,localStorage.setItem(e,String(a)),u()}function f(){let e=document.querySelector(`[data-testid="symbols-button"]`),t=e?.parentElement;t&&(s.parentElement!==t||s.nextElementSibling!==e)&&t.insertBefore(s,e)}function p(){c(),l(),s.type=`button`,s.className=n,s.title=`Toggle compact GitHub code view`,s.setAttribute(`aria-label`,`Toggle compact GitHub code view`),s.addEventListener(`click`,d),u(),f(),o?.disconnect(),o=new MutationObserver(()=>{u(),f()}),o.observe(document.body,{childList:!0,subtree:!0}),document.fonts?.ready.then(u).catch(()=>{})}document.readyState===`loading`?document.addEventListener(`DOMContentLoaded`,p,{once:!0}):p()})();
+  .${BUTTON_CLASS}:hover {
+    background: var(--button-default-bgColor-hover, #f6f8fa);
+  }
+
+  .${BUTTON_CLASS}[aria-pressed="true"] {
+    border-color: var(--fgColor-accent, #0969da);
+    color: var(--fgColor-accent, #0969da);
+  }
+`);
+	function syncState() {
+		document.body?.classList.toggle(ENABLED_CLASS, enabled);
+		if (!button) return;
+		button.setAttribute("aria-pressed", String(enabled));
+		button.textContent = enabled ? "📖" : "👓";
+	}
+	function setEnabled(next) {
+		enabled = next;
+		localStorage.setItem(STORAGE_KEY, String(enabled));
+		syncState();
+	}
+	function getButton() {
+		if (button) return button;
+		button = document.createElement("button");
+		button.type = "button";
+		button.className = BUTTON_CLASS;
+		button.title = "Toggle compact GitHub code view";
+		button.setAttribute("aria-label", "Toggle compact GitHub code view");
+		button.addEventListener("click", () => setEnabled(!enabled));
+		syncState();
+		return button;
+	}
+	function mountButton() {
+		const symbolsButton = document.querySelector("[data-testid=\"symbols-button\"]");
+		const parent = symbolsButton?.parentElement;
+		if (!symbolsButton || !parent || getButton().isConnected) return;
+		parent.insertBefore(getButton(), symbolsButton);
+		stopWatchingToolbar();
+	}
+	function queueMount() {
+		if (mountQueued) return;
+		mountQueued = true;
+		requestAnimationFrame(() => {
+			mountQueued = false;
+			mountButton();
+		});
+	}
+	function stopWatchingToolbar() {
+		toolbarObserver?.disconnect();
+		toolbarObserver = void 0;
+		if (toolbarObserverTimeout) window.clearTimeout(toolbarObserverTimeout);
+		toolbarObserverTimeout = void 0;
+	}
+	function watchForToolbar() {
+		queueMount();
+		if (getButton().isConnected || toolbarObserver || !document.body) return;
+		toolbarObserver = new MutationObserver(() => {
+			if (getButton().isConnected) stopWatchingToolbar();
+			else queueMount();
+		});
+		toolbarObserver.observe(document.body, {
+			childList: true,
+			subtree: true
+		});
+		toolbarObserverTimeout = window.setTimeout(stopWatchingToolbar, 5e3);
+	}
+	function start() {
+		syncState();
+		watchForToolbar();
+		document.addEventListener("turbo:load", watchForToolbar);
+		document.addEventListener("turbo:render", watchForToolbar);
+	}
+	if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start, { once: true });
+	else start();
+})();

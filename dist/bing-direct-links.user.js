@@ -17,4 +17,73 @@
 // @noframes
 // ==/UserScript==
 
-(function(){'use strict';var e=`https://www.bing.com/ck/a?`,t=5e3,n=new Map,r=new Map;function i(t){return t.href.startsWith(e)||t.hostname.endsWith(`.bing.com`)&&t.pathname===`/ck/a`}function a(e){let t=e.match(/\b(?:var\s+)?u\s*=\s*"([^"]+)"/u)?.[1];return t?t.replaceAll(`\\/`,`/`):(e.match(/http-equiv=["']refresh["'][^>]+content=["'][^"']*url=([^"']+)/iu)?.[1])?.replaceAll(`&amp;`,`&`)}async function o(e){let i=n.get(e);if(i)return i;let o=r.get(e);if(o)return o;let s=new AbortController,c=window.setTimeout(()=>s.abort(),t),l=fetch(e,{credentials:`same-origin`,signal:s.signal}).then(e=>e.text()).then(a).then(t=>(t&&n.set(e,t),t)).catch(()=>void 0).finally(()=>{window.clearTimeout(c),r.delete(e)});return r.set(e,l),l}async function s(e){if(e.dataset.jkkerBingDirect===`done`)return;let t;try{t=new URL(e.href)}catch{return}if(!i(t))return;e.dataset.jkkerBingDirect=`pending`;let n=await o(t.href);if(!n){delete e.dataset.jkkerBingDirect;return}e.dataset.jkkerBingOriginalHref=t.href,e.href=n,e.rel=[e.rel,`noreferrer`].filter(Boolean).join(` `),e.dataset.jkkerBingDirect=`done`}function c(e=document){for(let t of e.querySelectorAll(`a[href*="/ck/a?"]`))s(t)}function l(){c(),new MutationObserver(e=>{for(let t of e)for(let e of t.addedNodes)e instanceof HTMLAnchorElement?s(e):e instanceof Element&&c(e)}).observe(document.body,{childList:!0,subtree:!0})}document.readyState===`loading`?document.addEventListener(`DOMContentLoaded`,l,{once:!0}):l()})();
+(function() {
+  'use strict';
+	var BING_REDIRECT_PREFIX = "https://www.bing.com/ck/a?";
+	var REQUEST_TIMEOUT_MS = 5e3;
+	var resolvedUrls = new Map();
+	var pendingUrls = new Map();
+	function isBingRedirect(url) {
+		return url.href.startsWith(BING_REDIRECT_PREFIX) || url.hostname.endsWith(".bing.com") && url.pathname === "/ck/a";
+	}
+	function readDestinationFromHtml(html) {
+		const quoted = html.match(/\b(?:var\s+)?u\s*=\s*"([^"]+)"/u)?.[1];
+		if (quoted) return quoted.replaceAll("\\/", "/");
+		return (html.match(/http-equiv=["']refresh["'][^>]+content=["'][^"']*url=([^"']+)/iu)?.[1])?.replaceAll("&amp;", "&");
+	}
+	async function resolveRedirect(href) {
+		const resolved = resolvedUrls.get(href);
+		if (resolved) return resolved;
+		const pending = pendingUrls.get(href);
+		if (pending) return pending;
+		const controller = new AbortController();
+		const timeout = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+		const request = fetch(href, {
+			credentials: "same-origin",
+			signal: controller.signal
+		}).then((response) => response.text()).then(readDestinationFromHtml).then((destination) => {
+			if (destination) resolvedUrls.set(href, destination);
+			return destination;
+		}).catch(() => void 0).finally(() => {
+			window.clearTimeout(timeout);
+			pendingUrls.delete(href);
+		});
+		pendingUrls.set(href, request);
+		return request;
+	}
+	async function rewriteLink(link) {
+		if (link.dataset.jkkerBingDirect === "done") return;
+		let url;
+		try {
+			url = new URL(link.href);
+		} catch {
+			return;
+		}
+		if (!isBingRedirect(url)) return;
+		link.dataset.jkkerBingDirect = "pending";
+		const destination = await resolveRedirect(url.href);
+		if (!destination) {
+			delete link.dataset.jkkerBingDirect;
+			return;
+		}
+		link.dataset.jkkerBingOriginalHref = url.href;
+		link.href = destination;
+		link.rel = [link.rel, "noreferrer"].filter(Boolean).join(" ");
+		link.dataset.jkkerBingDirect = "done";
+	}
+	function scan(root = document) {
+		for (const link of root.querySelectorAll("a[href*=\"/ck/a?\"]")) rewriteLink(link);
+	}
+	function init() {
+		scan();
+		new MutationObserver((mutations) => {
+			for (const mutation of mutations) for (const node of mutation.addedNodes) if (node instanceof HTMLAnchorElement) rewriteLink(node);
+			else if (node instanceof Element) scan(node);
+		}).observe(document.body, {
+			childList: true,
+			subtree: true
+		});
+	}
+	if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init, { once: true });
+	else init();
+})();

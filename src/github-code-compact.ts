@@ -1,162 +1,163 @@
 const STORAGE_KEY = 'jkker.github-code-compact.enabled'
-const CLASS_NAME = 'jkker-github-code-compact'
-const TOGGLE_CLASS = 'jkker-code-toggle'
-const FONT_FAMILY = 'JetBrains Mono'
-const FONT_URL =
-  'https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap'
+const ENABLED_CLASS = 'jkker-github-code-compact'
+const BUTTON_CLASS = 'jkker-github-code-compact-toggle'
 
 let enabled = localStorage.getItem(STORAGE_KEY) === 'true'
-let observer: MutationObserver | undefined
-const toggleButton = document.createElement('button')
+let button: HTMLButtonElement | undefined
+let mountQueued = false
+let toolbarObserver: MutationObserver | undefined
+let toolbarObserverTimeout: number | undefined
 
-function loadFont(): void {
-  if (document.querySelector('link[data-jkker-github-code-font]')) return
+GM_addStyle(`
+  @import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap");
 
-  GM_addElement(document.documentElement, 'link', {
-    rel: 'preconnect',
-    href: 'https://fonts.gstatic.com',
-    crossorigin: 'anonymous',
-    'data-jkker-github-code-font': 'preconnect',
-  })
+  body.${ENABLED_CLASS} {
+    --jkker-github-code-font: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  }
 
-  GM_addElement(document.documentElement, 'link', {
-    rel: 'stylesheet',
-    href: FONT_URL,
-    'data-jkker-github-code-font': 'stylesheet',
-  })
+  body.${ENABLED_CLASS} .react-line-numbers {
+    display: none !important;
+  }
+
+  body.${ENABLED_CLASS} .react-code-text,
+  body.${ENABLED_CLASS} .react-code-line-contents,
+  body.${ENABLED_CLASS} .react-code-file-contents,
+  body.${ENABLED_CLASS} .react-code-lines,
+  body.${ENABLED_CLASS} #read-only-cursor-text-area,
+  body.${ENABLED_CLASS} textarea.react-blob-textarea,
+  body.${ENABLED_CLASS} .react-blob-print-hide {
+    font-family: var(--jkker-github-code-font) !important;
+    font-size: 12px !important;
+    line-height: 20px !important;
+    font-variant-ligatures: none !important;
+    font-feature-settings: normal !important;
+    letter-spacing: 0 !important;
+    tab-size: 4 !important;
+  }
+
+  body.${ENABLED_CLASS} .react-code-line-contents,
+  body.${ENABLED_CLASS} #read-only-cursor-text-area,
+  body.${ENABLED_CLASS} textarea.react-blob-textarea,
+  body.${ENABLED_CLASS} .react-blob-print-hide {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    text-indent: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  body.${ENABLED_CLASS} #read-only-cursor-text-area,
+  body.${ENABLED_CLASS} textarea.react-blob-textarea,
+  body.${ENABLED_CLASS} .react-blob-print-hide {
+    margin-top: 0 !important;
+    left: 0 !important;
+    white-space: pre !important;
+    overflow-wrap: normal !important;
+  }
+
+  .${BUTTON_CLASS} {
+    width: 28px;
+    height: 28px;
+    margin-right: 4px;
+    border: 1px solid var(--borderColor-default, #d0d7de);
+    border-radius: 6px;
+    background: var(--bgColor-default, #ffffff);
+    color: var(--fgColor-default, #24292f);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    line-height: 1;
+  }
+
+  .${BUTTON_CLASS}:hover {
+    background: var(--button-default-bgColor-hover, #f6f8fa);
+  }
+
+  .${BUTTON_CLASS}[aria-pressed="true"] {
+    border-color: var(--fgColor-accent, #0969da);
+    color: var(--fgColor-accent, #0969da);
+  }
+`)
+
+function syncState(): void {
+  document.body?.classList.toggle(ENABLED_CLASS, enabled)
+
+  if (!button) return
+  button.setAttribute('aria-pressed', String(enabled))
+  button.textContent = enabled ? '📖' : '👓'
 }
 
-function installStyles(): void {
-  GM_addStyle(`
-    body.${CLASS_NAME} {
-      --jkker-code-font: "${FONT_FAMILY}", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-    }
-
-    body.${CLASS_NAME} .react-line-numbers,
-    body.${CLASS_NAME} [class^="react-line-numbers"] {
-      display: none !important;
-      width: 0 !important;
-      min-width: 0 !important;
-      flex-basis: 0 !important;
-    }
-
-    body.${CLASS_NAME} .react-code-text,
-    body.${CLASS_NAME} .react-code-line-contents,
-    body.${CLASS_NAME} .react-code-file-contents,
-    body.${CLASS_NAME} .react-code-lines,
-    body.${CLASS_NAME} .blob-code,
-    body.${CLASS_NAME} .blob-code-inner,
-    body.${CLASS_NAME} pre,
-    body.${CLASS_NAME} code,
-    body.${CLASS_NAME} #read-only-cursor-text-area,
-    body.${CLASS_NAME} textarea.react-blob-textarea,
-    body.${CLASS_NAME} .react-blob-print-hide {
-      font-family: var(--jkker-code-font) !important;
-      font-size: 12px !important;
-      font-weight: 400 !important;
-      line-height: 20px !important;
-      font-variant-ligatures: none !important;
-      font-feature-settings: normal !important;
-      letter-spacing: 0 !important;
-      tab-size: 4 !important;
-    }
-
-    body.${CLASS_NAME} .react-code-line-contents {
-      padding-left: 0 !important;
-      padding-right: 0 !important;
-      margin-left: 0 !important;
-      margin-right: 0 !important;
-      text-indent: 0 !important;
-    }
-
-    body.${CLASS_NAME} #read-only-cursor-text-area,
-    body.${CLASS_NAME} textarea.react-blob-textarea,
-    body.${CLASS_NAME} .react-blob-print-hide {
-      padding-left: 0 !important;
-      padding-right: 0 !important;
-      margin-left: 0 !important;
-      margin-right: 0 !important;
-      margin-top: 0 !important;
-      left: 0 !important;
-      text-indent: 0 !important;
-      box-sizing: border-box !important;
-      white-space: pre !important;
-      overflow-wrap: normal !important;
-    }
-
-    .${TOGGLE_CLASS} {
-      width: 28px;
-      height: 28px;
-      border: 1px solid var(--borderColor-default, #d0d7de);
-      background: var(--bgColor-default, #ffffff);
-      border-radius: 6px;
-      cursor: pointer;
-      margin-right: 4px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 15px;
-      line-height: 1;
-    }
-
-    .${TOGGLE_CLASS}:hover {
-      background-color: var(--button-default-bgColor-hover, #f6f8fa);
-    }
-
-    .${TOGGLE_CLASS}[aria-pressed="true"] {
-      border-color: var(--fgColor-accent, #0969da);
-      color: var(--fgColor-accent, #0969da);
-    }
-  `)
-}
-
-function applyState(): void {
-  if (!document.body) return
-  document.body.classList.toggle(CLASS_NAME, enabled)
-  toggleButton.setAttribute('aria-pressed', String(enabled))
-  toggleButton.textContent = enabled ? '📖' : '👓'
-}
-
-function toggle(): void {
-  enabled = !enabled
+function setEnabled(next: boolean): void {
+  enabled = next
   localStorage.setItem(STORAGE_KEY, String(enabled))
-  applyState()
+  syncState()
 }
 
-function insertToggle(): void {
+function getButton(): HTMLButtonElement {
+  if (button) return button
+
+  button = document.createElement('button')
+  button.type = 'button'
+  button.className = BUTTON_CLASS
+  button.title = 'Toggle compact GitHub code view'
+  button.setAttribute('aria-label', 'Toggle compact GitHub code view')
+  button.addEventListener('click', () => setEnabled(!enabled))
+  syncState()
+  return button
+}
+
+function mountButton(): void {
   const symbolsButton = document.querySelector('[data-testid="symbols-button"]')
   const parent = symbolsButton?.parentElement
-  if (!parent) return
 
-  if (toggleButton.parentElement !== parent || toggleButton.nextElementSibling !== symbolsButton)
-    parent.insertBefore(toggleButton, symbolsButton)
+  if (!symbolsButton || !parent || getButton().isConnected) return
+  parent.insertBefore(getButton(), symbolsButton)
+  stopWatchingToolbar()
 }
 
-function init(): void {
-  loadFont()
-  installStyles()
+function queueMount(): void {
+  if (mountQueued) return
+  mountQueued = true
 
-  toggleButton.type = 'button'
-  toggleButton.className = TOGGLE_CLASS
-  toggleButton.title = 'Toggle compact GitHub code view'
-  toggleButton.setAttribute('aria-label', 'Toggle compact GitHub code view')
-  toggleButton.addEventListener('click', toggle)
-
-  applyState()
-  insertToggle()
-
-  observer?.disconnect()
-  observer = new MutationObserver(() => {
-    applyState()
-    insertToggle()
+  requestAnimationFrame(() => {
+    mountQueued = false
+    mountButton()
   })
-  observer.observe(document.body, { childList: true, subtree: true })
+}
 
-  document.fonts?.ready.then(applyState).catch(() => {})
+function stopWatchingToolbar(): void {
+  toolbarObserver?.disconnect()
+  toolbarObserver = undefined
+
+  if (toolbarObserverTimeout) window.clearTimeout(toolbarObserverTimeout)
+  toolbarObserverTimeout = undefined
+}
+
+function watchForToolbar(): void {
+  queueMount()
+  if (getButton().isConnected || toolbarObserver || !document.body) return
+
+  toolbarObserver = new MutationObserver(() => {
+    if (getButton().isConnected) stopWatchingToolbar()
+    else queueMount()
+  })
+  toolbarObserver.observe(document.body, { childList: true, subtree: true })
+  toolbarObserverTimeout = window.setTimeout(stopWatchingToolbar, 5000)
+}
+
+function start(): void {
+  syncState()
+  watchForToolbar()
+
+  document.addEventListener('turbo:load', watchForToolbar)
+  document.addEventListener('turbo:render', watchForToolbar)
 }
 
 if (document.readyState === 'loading')
-  document.addEventListener('DOMContentLoaded', init, { once: true })
-else init()
+  document.addEventListener('DOMContentLoaded', start, { once: true })
+else start()
 
 export {}

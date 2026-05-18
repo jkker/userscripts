@@ -16,4 +16,34 @@
 // @noframes
 // ==/UserScript==
 
-(function(){'use strict';var e=[`Special:`,`Talk:`,`User:`,`User_talk:`,`Wikipedia:`,`File:`,`MediaWiki:`,`Template:`,`Help:`,`Category:`,`Portal:`,`Draft:`,`TimedText:`,`Module:`];function t(e){let t=e.split(`.`);return t[0]===`www`&&t.shift(),t.length>2?t[0]??`en`:`en`}var n=decodeURIComponent(location.pathname.replace(/^\/wiki\//u,``));if(!(!n||e.some(e=>n.startsWith(e)))){let e=t(location.hostname),r=new URL(`/${e}/${encodeURIComponent(n).replaceAll(`%2F`,`/`)}`,`https://www.wikiwand.com`);r.hash=location.hash,location.replace(r.href)}})();
+(function() {
+  'use strict';
+	var SKIPPED_PREFIXES = [
+		"Special:",
+		"Talk:",
+		"User:",
+		"User_talk:",
+		"Wikipedia:",
+		"File:",
+		"MediaWiki:",
+		"Template:",
+		"Help:",
+		"Category:",
+		"Portal:",
+		"Draft:",
+		"TimedText:",
+		"Module:"
+	];
+	function languageFromHost(hostname) {
+		const parts = hostname.split(".");
+		if (parts[0] === "www") parts.shift();
+		return parts.length > 2 ? parts[0] ?? "en" : "en";
+	}
+	var article = decodeURIComponent(location.pathname.replace(/^\/wiki\//u, ""));
+	if (!(!article || SKIPPED_PREFIXES.some((prefix) => article.startsWith(prefix)))) {
+		const language = languageFromHost(location.hostname);
+		const destination = new URL(`/${language}/${encodeURIComponent(article).replaceAll("%2F", "/")}`, "https://www.wikiwand.com");
+		destination.hash = location.hash;
+		location.replace(destination.href);
+	}
+})();

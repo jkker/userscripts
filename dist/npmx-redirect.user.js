@@ -17,4 +17,40 @@
 // @noframes
 // ==/UserScript==
 
-(function(){'use strict';var e=`utm_source`,t=`npmx`;function n(n){return n.hostname===`www.npmjs.com`&&n.pathname.startsWith(`/package/`)&&n.searchParams.get(e)!==t}function r(e){let t=new URL(e.pathname+e.hash,`https://npmx.dev`);location.replace(t.href)}function i(n=document){for(let r of n.querySelectorAll(`a[href*="npmjs.com/package/"]:not([data-jkker-npmx-patched])`))try{let n=new URL(r.href);if(n.hostname!==`www.npmjs.com`||!n.pathname.startsWith(`/package/`))continue;n.searchParams.set(e,t),r.href=n.href,r.dataset.jkkerNpmxPatched=`true`}catch{}}function a(){let e=()=>{i(),new MutationObserver(e=>{for(let t of e)for(let e of t.addedNodes)e instanceof Element&&i(e)}).observe(document.body,{childList:!0,subtree:!0})};document.readyState===`loading`?document.addEventListener(`DOMContentLoaded`,e,{once:!0}):e()}var o=new URL(location.href);n(o)?r(o):o.hostname===`npmx.dev`&&a()})();
+(function() {
+  'use strict';
+	var BYPASS_KEY = "utm_source";
+	var BYPASS_VALUE = "npmx";
+	function shouldRedirectFromNpm(url) {
+		return url.hostname === "www.npmjs.com" && url.pathname.startsWith("/package/") && url.searchParams.get(BYPASS_KEY) !== BYPASS_VALUE;
+	}
+	function redirectToNpmx(url) {
+		const destination = new URL(url.pathname + url.hash, "https://npmx.dev");
+		location.replace(destination.href);
+	}
+	function patchNpmLinks(root = document) {
+		for (const link of root.querySelectorAll(`a[href*="npmjs.com/package/"]:not([data-jkker-npmx-patched])`)) try {
+			const url = new URL(link.href);
+			if (url.hostname !== "www.npmjs.com" || !url.pathname.startsWith("/package/")) continue;
+			url.searchParams.set(BYPASS_KEY, BYPASS_VALUE);
+			link.href = url.href;
+			link.dataset.jkkerNpmxPatched = "true";
+		} catch {}
+	}
+	function observeNpmxLinks() {
+		const start = () => {
+			patchNpmLinks();
+			new MutationObserver((mutations) => {
+				for (const mutation of mutations) for (const node of mutation.addedNodes) if (node instanceof Element) patchNpmLinks(node);
+			}).observe(document.body, {
+				childList: true,
+				subtree: true
+			});
+		};
+		if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start, { once: true });
+		else start();
+	}
+	var currentUrl = new URL(location.href);
+	if (shouldRedirectFromNpm(currentUrl)) redirectToNpmx(currentUrl);
+	else if (currentUrl.hostname === "npmx.dev") observeNpmxLinks();
+})();
