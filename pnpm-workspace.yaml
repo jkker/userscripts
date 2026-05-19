@@ -3,7 +3,7 @@ packages: []
 catalogMode: prefer
 
 catalog:
-  '@types/node': ^25.8.0
+  '@types/node': ^25.9.0
   vite: npm:@voidzero-dev/vite-plus-core@latest
   vitest: npm:@voidzero-dev/vite-plus-test@latest
   vite-plus: latest

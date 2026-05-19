@@ -10,8 +10,8 @@ catalogs:
       specifier: ^3.0.5
       version: 3.0.5
     '@types/node':
-      specifier: ^25.8.0
-      version: 25.8.0
+      specifier: ^25.9.0
+      version: 25.9.0
     hosted-git-info:
       specifier: ^10.1.0
       version: 10.1.0
@@ -39,7 +39,7 @@ importers:
         version: 3.0.5
       '@types/node':
         specifier: 'catalog:'
-        version: 25.8.0
+        version: 25.9.0
       hosted-git-info:
         specifier: 'catalog:'
         version: 10.1.0
@@ -48,13 +48,13 @@ importers:
         version: 16.20.0
       vite:
         specifier: npm:@voidzero-dev/vite-plus-core@latest
-        version: '@voidzero-dev/vite-plus-core@0.1.21(@types/node@25.8.0)'
+        version: '@voidzero-dev/vite-plus-core@0.1.21(@types/node@25.9.0)'
       vite-plugin-monkey:
         specifier: 'catalog:'
-        version: 8.0.5(@voidzero-dev/vite-plus-core@0.1.21(@types/node@25.8.0))(postcss@8.5.14)
+        version: 8.0.5(@voidzero-dev/vite-plus-core@0.1.21(@types/node@25.9.0))(postcss@8.5.14)
       vite-plus:
         specifier: 'catalog:'
-        version: 0.1.21(@types/node@25.8.0)(@voidzero-dev/vite-plus-core@0.1.21(@types/node@25.8.0))
+        version: 0.1.21(@types/node@25.9.0)(@voidzero-dev/vite-plus-core@0.1.21(@types/node@25.9.0))
 
 packages:
 
@@ -498,8 +498,8 @@ packages:
   '@types/hosted-git-info@3.0.5':
     resolution: {integrity: sha512-Dmngh7U003cOHPhKGyA7LWqrnvcTyILNgNPmNCxlx7j8MIi54iBliiT8XqVLIQ3GchoOjVAyBzNJVyuaJjqokg==}
 
-  '@types/node@25.8.0':
-    resolution: {integrity: sha512-TCFSk8IZh+iLX1xtksoBVtdmgL+1IX0fC9BeU4QqFSuNdN/K+HUlhqOzEmSYYpZUVsLYcPqc9KX+60iDuninSQ==}
+  '@types/node@25.9.0':
+    resolution: {integrity: sha512-AOQwYUNolgy3VosiRqXrACUXTN8nJUtPl7FJXMqZVyxiiCLhQuG3jXKvCS1ALr+Y2OmZhzzLVlYPEqJaiqkaJQ==}
 
   '@voidzero-dev/vite-plus-core@0.1.21':
     resolution: {integrity: sha512-BEnqw8h2vxgKkzBjmmW4e1kwPwzoWc+jXJQB+7e0Dm1/1AkdTaQ9FgUMFzDfYrwTDkGzCZHSSsHDOl3RERQFTA==}
@@ -1254,18 +1254,18 @@ snapshots:
 
   '@types/hosted-git-info@3.0.5': {}
 
-  '@types/node@25.8.0':
+  '@types/node@25.9.0':
     dependencies:
       undici-types: 7.24.6
 
-  '@voidzero-dev/vite-plus-core@0.1.21(@types/node@25.8.0)':
+  '@voidzero-dev/vite-plus-core@0.1.21(@types/node@25.9.0)':
     dependencies:
       '@oxc-project/runtime': 0.129.0
       '@oxc-project/types': 0.129.0
       lightningcss: 1.32.0
       postcss: 8.5.14
     optionalDependencies:
-      '@types/node': 25.8.0
+      '@types/node': 25.9.0
       fsevents: 2.3.3
 
   '@voidzero-dev/vite-plus-darwin-arm64@0.1.21':
@@ -1286,11 +1286,11 @@ snapshots:
   '@voidzero-dev/vite-plus-linux-x64-musl@0.1.21':
     optional: true
 
-  '@voidzero-dev/vite-plus-test@0.1.21(@types/node@25.8.0)(@voidzero-dev/vite-plus-core@0.1.21(@types/node@25.8.0))':
+  '@voidzero-dev/vite-plus-test@0.1.21(@types/node@25.9.0)(@voidzero-dev/vite-plus-core@0.1.21(@types/node@25.9.0))':
     dependencies:
       '@standard-schema/spec': 1.1.0
       '@types/chai': 5.2.3
-      '@voidzero-dev/vite-plus-core': 0.1.21(@types/node@25.8.0)
+      '@voidzero-dev/vite-plus-core': 0.1.21(@types/node@25.9.0)
       es-module-lexer: 1.7.0
       obug: 2.1.1
       pixelmatch: 7.2.0
@@ -1300,10 +1300,10 @@ snapshots:
       tinybench: 2.9.0
       tinyexec: 1.1.2
       tinyglobby: 0.2.16
-      vite: '@voidzero-dev/vite-plus-core@0.1.21(@types/node@25.8.0)'
+      vite: '@voidzero-dev/vite-plus-core@0.1.21(@types/node@25.9.0)'
       ws: 8.20.1
     optionalDependencies:
-      '@types/node': 25.8.0
+      '@types/node': 25.9.0
     transitivePeerDependencies:
       - '@arethetypeswrong/core'
       - '@tsdown/css'
@@ -1662,7 +1662,7 @@ snapshots:
 
   undici-types@7.24.6: {}
 
-  vite-plugin-monkey@8.0.5(@voidzero-dev/vite-plus-core@0.1.21(@types/node@25.8.0))(postcss@8.5.14):
+  vite-plugin-monkey@8.0.5(@voidzero-dev/vite-plus-core@0.1.21(@types/node@25.9.0))(postcss@8.5.14):
     dependencies:
       acorn-walk: 8.3.5
       cross-spawn: 7.0.6
@@ -1676,15 +1676,15 @@ snapshots:
       rollup: 4.60.4
       systemjs: 6.15.1
     optionalDependencies:
-      vite: '@voidzero-dev/vite-plus-core@0.1.21(@types/node@25.8.0)'
+      vite: '@voidzero-dev/vite-plus-core@0.1.21(@types/node@25.9.0)'
     transitivePeerDependencies:
       - postcss
 
-  vite-plus@0.1.21(@types/node@25.8.0)(@voidzero-dev/vite-plus-core@0.1.21(@types/node@25.8.0)):
+  vite-plus@0.1.21(@types/node@25.9.0)(@voidzero-dev/vite-plus-core@0.1.21(@types/node@25.9.0)):
     dependencies:
       '@oxc-project/types': 0.129.0
-      '@voidzero-dev/vite-plus-core': 0.1.21(@types/node@25.8.0)
-      '@voidzero-dev/vite-plus-test': 0.1.21(@types/node@25.8.0)(@voidzero-dev/vite-plus-core@0.1.21(@types/node@25.8.0))
+      '@voidzero-dev/vite-plus-core': 0.1.21(@types/node@25.9.0)
+      '@voidzero-dev/vite-plus-test': 0.1.21(@types/node@25.9.0)(@voidzero-dev/vite-plus-core@0.1.21(@types/node@25.9.0))
       oxfmt: 0.48.0
       oxlint: 1.63.0(oxlint-tsgolint@0.22.1)
       oxlint-tsgolint: 0.22.1
