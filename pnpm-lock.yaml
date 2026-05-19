@@ -13,8 +13,8 @@ catalogs:
       specifier: ^25.8.0
       version: 25.8.0
     hosted-git-info:
-      specifier: ^10.1.0
-      version: 10.1.0
+      specifier: ^10.1.1
+      version: 10.1.1
     simple-icons:
       specifier: ^16.20.0
       version: 16.20.0
@@ -42,7 +42,7 @@ importers:
         version: 25.8.0
       hosted-git-info:
         specifier: 'catalog:'
-        version: 10.1.0
+        version: 10.1.1
       simple-icons:
         specifier: 'catalog:'
         version: 16.20.0
@@ -733,8 +733,8 @@ packages:
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
     os: [darwin]
 
-  hosted-git-info@10.1.0:
-    resolution: {integrity: sha512-GquyT8u4Y0JkvqQNuKanSa2z5tYEjPLqHeYW8yjJ3v7DTNvofVBctIVBh6TToHELghuaQAVh8LkVF0AqqZS01w==}
+  hosted-git-info@10.1.1:
+    resolution: {integrity: sha512-DeOnSPAvOndYKfw075gt8yZzQ7S2hNztw34zBTfhIzLhmBTswIBg5/y+pqu/VD5cYWm5goAFTusDmUEmKZ0PEQ==}
     engines: {node: ^22.22.2 || ^24.15.0 || >=26.0.0}
 
   htmlparser2@12.0.0:
@@ -1401,7 +1401,7 @@ snapshots:
   fsevents@2.3.3:
     optional: true
 
-  hosted-git-info@10.1.0:
+  hosted-git-info@10.1.1:
     dependencies:
       lru-cache: 11.3.6
 
